@@ -9,7 +9,15 @@ make install
 
 Will install python3.13, ollama, a small llm(qwen3.52b) and the necessary python dependencies. It will create a virtual python environment to prevent breakage of any system version of python.
 
-# Different llms
+## Running
+
+Running is simple, simply run:
+
+```
+python agent.py
+```
+
+## Different llms
 You may want to try a different model. The model included qwen3.5:2b is small(2.7gb) and lightweight, with support for calling tools but you might be happy with a larger and more capable one because you have cpu or disk to burn.
 
 Ollama [publish a large list of models](https://ollama.com/search) that are open source and available to use.
