@@ -86,5 +86,5 @@ uninstall:
 	@ollama rm qwen3.5:2b
 		
 	@echo Removing ollama...
-	@${UNINSTALL_CMD} uninstall ollama
+	@${UNINSTALL_CMD} ollama
 
