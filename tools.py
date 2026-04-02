@@ -12,7 +12,7 @@ from langchain.tools import tool
 @tool()
 def get_line_information(line: str):
     """
-    A function designed to retrieve information on a given public transport line in London. The argument line could be a tube line, a bus route or other named line. Examples of the line argument might be something like 'central' or 'piccadilly', while buse lines will be something like 'N11'.
+    A function designed to retrieve information on a given public transport line in London. The argument line could be a tube line, a bus route or other named line. Examples of the line argument might be something like 'central' or 'piccadilly', while bus lines will be something like 'N11'.
 
     :returns: A dictionary containing information about the transport line such as the mode of transport, any potential disruptions, the status of the lines and the service type i.e. what times of the day it runs. 
     """

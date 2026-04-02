@@ -18,7 +18,6 @@ UNAME_R := $(shell uname -r)
 ifeq ($(UNAME_S),Darwin)
 	# macOS Specific
 	INSTALL_CMD = brew install
-	UNINSTALL_CMD = brew uninstall
 	PLATFORM = MacOS
 	PYTHON_VERSION = @3.13
 	WHICH_VERSION = /usr/bin/which
@@ -26,13 +25,11 @@ else
 	# Check if this is Linux under WSL
 	ifneq ($(filter %microsoft%,$(shell echo $(UNAME_R) | tr '[:upper:]' '[:lower:]')),)
 		INSTALL_CMD = sudo apt-get install -y
-		UNINSTALL_CMD = sudo apt-get remove -y
 		PLATFORM = WSL
 		PYTHON_VERSION=3.13
 		WHICH_VERSION=which
 	else
 		INSTALL_CMD = sudo apt-get install -y
-		UNINSTALL_CMD = sudo apt-get remove -y
 		PLATFORM = Linux (Native)
 		PYTHON_VERSION=3.13
 		WHICH_VERSION=which
@@ -58,7 +55,7 @@ install:
 	@echo Installing python libraries...
 	@${PIP} install -r requirements.txt
 
-	@if ! [ $(${WHICH_VERSION} -s ollama) ]; then \
+	@if ${WHICH_VERSION} -s ollama > /dev/null 2>&1; then \
 		echo "Ollama is already installed. Skipping installation."; \
 	else \
 		echo Install Ollama local llm manager...; \
@@ -69,7 +66,8 @@ install:
 	@ollama pull qwen3.5:2b
 
 	@echo "\n****** Done installing ******"
-	@echo "To get started run:\n\033[0;92m. ${VENV_BIN_DIR}/activate\033[0m"
+	@echo "To use the python env run:\n\033[0;92m. ${VENV_BIN_DIR}/activate\033[0m"
+	@echo "If ollama did not start on install, run: ollama serve &"
 
 	@if ! grep -q "source ${BASH_PROFILE}" ${ZSHRC_FILE}; then \
 		echo "\n\nsource ${BASH_PROFILE}" >> ${ZSHRC_FILE}; \
@@ -81,10 +79,24 @@ install:
 uninstall:
 	@echo "Removing ${VENV_NAME} from ${VENV_DIR}..."
 	@rm -rf ${VENV_DIR}/${VENV_NAME}
-
-	@echo Removing qwen3.5:2b...
-	@ollama rm qwen3.5:2b
-		
-	@echo Removing ollama...
-	@${UNINSTALL_CMD} ollama
-
+	
+	@echo Removing ollama and installed models...
+	@if [ "${PLATFORM}" == "MacOS" ]; then \
+		sudo rm -rf /Applications/Ollama.app; \
+		sudo rm /usr/local/bin/ollama; \
+		rm -rf "~/Library/Application Support/Ollama"; \
+		rm -rf "~/Library/Saved Application State/com.electron.ollama.savedState"; \
+		rm -rf "~/Library/Caches/com.electron.ollama"; \
+		rm -rf "~/Library/Caches/ollama"; \
+		rm -rf "~/Library/WebKit/com.electron.ollama"; \
+		rm -rf "~/.ollama"; \
+	else \
+		sudo systemctl stop ollama; \
+		sudo systemctl disable ollama; \
+		sudo rm /etc/systemd/system/ollama.service; \
+		sudo rm -r $(which ollama | tr 'bin' 'lib'); \
+		sudo rm $(which ollama); \
+		sudo userdel ollama; \
+		sudo groupdel ollama; \
+		sudo rm -r /usr/share/ollama; \
+	fi
